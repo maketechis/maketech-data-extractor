@@ -1,3 +1,4 @@
+app.include_router(sources_router)
 from fastapi import FastAPI
 from app.api.campaigns import router as campaigns_router
 from app.api.geography import router as geography_router
@@ -10,6 +11,7 @@ from app.api.enrichment_jobs import router as enrichment_jobs_router
 from app.api.pipeline import router as pipeline_router
 from app.api.exports import router as exports_router
 from app.api.history import router as history_router
+from app.api.sources import router as sources_router
 from app.config import get_settings
 
 settings=get_settings()
