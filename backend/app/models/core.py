@@ -22,12 +22,14 @@ class State(Base):
     country_id: Mapped[int]=mapped_column(ForeignKey("countries.id", ondelete="CASCADE"), index=True)
     name: Mapped[str]=mapped_column(String(120), index=True)
     code: Mapped[str|None]=mapped_column(String(20), nullable=True)
+    lgd_code: Mapped[str|None]=mapped_column(String(20), nullable=True, unique=True, index=True)
 class District(Base):
     __tablename__="districts"; __table_args__=(UniqueConstraint("state_id","name"),)
     id: Mapped[int]=mapped_column(primary_key=True)
     state_id: Mapped[int]=mapped_column(ForeignKey("states.id", ondelete="CASCADE"), index=True)
     name: Mapped[str]=mapped_column(String(160), index=True)
     normalized_name: Mapped[str]=mapped_column(String(160), index=True)
+    lgd_code: Mapped[str|None]=mapped_column(String(20), nullable=True, unique=True, index=True)
 class EntityType(Base):
     __tablename__="entity_types"
     id: Mapped[int]=mapped_column(primary_key=True)
