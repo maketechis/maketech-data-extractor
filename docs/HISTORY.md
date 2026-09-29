@@ -1,16 +1,23 @@
-# Extraction history
+# Campaign history
 
-The platform keeps current entity data and an append-only operational history.
+Campaign history preserves each execution of a campaign so previous runs remain visible after later runs.
 
-ExtractionRun records each collection/enrichment execution with campaign, district, timestamps, counts, status and errors.
+A CampaignRun stores:
+- campaign
+- start/end time
+- final status
+- total/completed/failed districts
+- records found/saved
 
-ExtractionEvent records material entity changes such as:
-- entity discovered
-- phone/email added
-- website candidate/verification changes
-- address/PIN filled
-- future merge/dedup decisions
+CampaignRunDistrict snapshots the district-level result for that run:
+- district
+- status
+- attempts
+- records found/saved
+- start/end time
+- last error
 
-Events retain old/new values, exact source URL and confidence when available.
+This supports a History screen such as:
+Bookseller — India — Completed — 780/780 districts — 125,420 records — View / Export.
 
-History must not be overwritten when current entity data changes. This enables auditing, re-verification, debugging and before/after comparisons.
+History is run-oriented. Detailed per-field change auditing is intentionally postponed.
