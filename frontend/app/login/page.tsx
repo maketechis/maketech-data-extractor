@@ -1,0 +1,1 @@
+export default function Login(){return <main className="login"><div className="loginbox"><h1>MakeTech Data Extractor</h1><p className="muted">Sign in to manage campaigns and extracted data.</p><a className="btn" href="/auth/login">Continue with Google</a></div></main>}
