@@ -4,6 +4,7 @@ from app.api.geography import router as geography_router
 from app.api.collector import router as collector_router
 from app.api.jobs import router as jobs_router
 from app.api.campaign_control import router as campaign_control_router
+from app.api.enrichment import router as enrichment_router
 
 app = FastAPI(
     title="MakeTech Data Extractor",
@@ -15,6 +16,7 @@ app.include_router(campaigns_router)
 app.include_router(collector_router)
 app.include_router(jobs_router)
 app.include_router(campaign_control_router)
+app.include_router(enrichment_router)
 
 @app.get("/")
 def root():
