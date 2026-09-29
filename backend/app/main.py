@@ -11,11 +11,12 @@ from app.api.pipeline import router as pipeline_router
 from app.api.exports import router as exports_router
 from app.api.history import router as history_router
 from app.api.sources import router as sources_router
+from app.api.geography_validation import router as geography_validation_router
 from app.config import get_settings
 
 settings=get_settings()
 app=FastAPI(title=settings.app_name,version="0.5.0",description="District-wise entity collection and enrichment platform")
-for router in (geography_router,campaigns_router,collector_router,jobs_router,campaign_control_router,enrichment_router,verification_router,enrichment_jobs_router,pipeline_router,exports_router,history_router,sources_router):
+for router in (geography_router,campaigns_router,collector_router,jobs_router,campaign_control_router,enrichment_router,verification_router,enrichment_jobs_router,pipeline_router,exports_router,history_router,sources_router,geography_validation_router):
     app.include_router(router)
 
 @app.get("/")
