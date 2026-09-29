@@ -1,15 +1,22 @@
 from datetime import datetime, timezone
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
-from app.models.history import ExtractionEvent, ExtractionRun
+from app.models.core import CampaignLocation, LocationStatus
+from app.models.history import CampaignRun, CampaignRunDistrict
 
-def start_run(db:Session,*,campaign_id=None,district_id=None,run_type="collection"):
-    row=ExtractionRun(campaign_id=campaign_id,district_id=district_id,run_type=run_type,status="running")
-    db.add(row); db.commit(); db.refresh(row); return row
+def start_campaign_run(db:Session,campaign_id:int):
+    total=db.scalar(select(func.count(CampaignLocation.id)).where(CampaignLocation.campaign_id==campaign_id)) or 0
+    run=CampaignRun(campaign_id=campaign_id,status="running",districts_total=total)
+    db.add(run); db.commit(); db.refresh(run); return run
 
-def finish_run(db:Session,run:ExtractionRun,*,status="completed",raw_count=0,saved_count=0,error=None):
-    run.status=status; run.raw_count=raw_count; run.saved_count=saved_count; run.error=error
-    run.completed_at=datetime.now(timezone.utc); db.commit(); return run
+def snapshot_campaign_run(db:Session,run:CampaignRun):
+    locations=db.scalars(select(CampaignLocation).where(CampaignLocation.campaign_id==run.campaign_id)).all()
+    db.query(CampaignRunDistrict).filter(CampaignRunDistrict.campaign_run_id==run.id).delete()
+    for x in locations:
+        db.add(CampaignRunDistrict(campaign_run_id=run.id,district_id=x.district_id,status=x.status.value,attempts=x.attempts,records_found=x.records_found,records_saved=x.records_saved,started_at=x.started_at,completed_at=x.completed_at,last_error=x.last_error))
+    run.districts_total=len(locations); run.districts_completed=sum(x.status==LocationStatus.COMPLETED for x in locations); run.districts_failed=sum(x.status==LocationStatus.FAILED for x in locations)
+    run.records_found=sum(x.records_found for x in locations); run.records_saved=sum(x.records_saved for x in locations)
+    db.commit(); return run
 
-def record_event(db:Session,*,run_id,entity_id=None,event_type,field_name=None,old_value=None,new_value=None,source_url=None,confidence=None):
-    row=ExtractionEvent(run_id=run_id,entity_id=entity_id,event_type=event_type,field_name=field_name,old_value=old_value,new_value=new_value,source_url=source_url,confidence=str(confidence) if confidence is not None else None)
-    db.add(row); db.flush(); return row
+def finish_campaign_run(db:Session,run:CampaignRun,status:str):
+    snapshot_campaign_run(db,run); run.status=status; run.completed_at=datetime.now(timezone.utc); db.commit(); return run
