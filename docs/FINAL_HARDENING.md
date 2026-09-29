@@ -1,0 +1,1 @@
+Final hardening before source expansion: database uniqueness constraints for contacts, website domains and campaign-run district snapshots; crawler validates public destinations, blocks cross-domain redirects, accepts HTML only, caps responses at 2 MB, and retains page/time limits.\n
