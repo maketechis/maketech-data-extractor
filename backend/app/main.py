@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from app.api.campaigns import router as campaigns_router
-from app.api.geography import router as geography_router\nfrom app.api.collector import router as collector_router
+from app.api.geography import router as geography_router
+from app.api.collector import router as collector_router
 
 app = FastAPI(
     title="MakeTech Data Extractor",
@@ -8,7 +9,8 @@ app = FastAPI(
     description="District-wise entity collection and enrichment platform",
 )
 app.include_router(geography_router)
-app.include_router(campaigns_router)\napp.include_router(collector_router)
+app.include_router(campaigns_router)
+app.include_router(collector_router)
 
 @app.get("/")
 def root():
@@ -19,5 +21,9 @@ def health():
     return {
         "status": "ok",
         "environment": "development",
-        "system": {"orchestrator": "implemented", "collector": "pending", "enricher": "pending"},
+        "system": {
+            "orchestrator": "implemented",
+            "collector": "implemented",
+            "enricher": "pending",
+        },
     }
