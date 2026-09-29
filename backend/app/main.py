@@ -9,6 +9,7 @@ from app.api.verification import router as verification_router
 from app.api.enrichment_jobs import router as enrichment_jobs_router
 from app.api.pipeline import router as pipeline_router
 from app.api.exports import router as exports_router
+from app.api.history import router as history_router
 
 app = FastAPI(
     title="MakeTech Data Extractor",
@@ -25,6 +26,7 @@ app.include_router(verification_router)
 app.include_router(enrichment_jobs_router)
 app.include_router(pipeline_router)
 app.include_router(exports_router)
+app.include_router(history_router)
 
 @app.get("/")
 def root():
