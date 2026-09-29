@@ -19,6 +19,7 @@ class SourcePlanItem:
 PURPOSE_RULES={
     "csv":{SourcePurpose.ENTITY_LIST:10},
     "osm":{SourcePurpose.SUPPLEMENTAL_DISCOVERY:50},
+    "google_direct":{SourcePurpose.SUPPLEMENTAL_DISCOVERY:70,SourcePurpose.WEBSITE_DISCOVERY:20},
 }
 
 def build_source_plan(*,entity_type:str,country_iso:str,purpose:SourcePurpose,allow_paid:bool=False):
