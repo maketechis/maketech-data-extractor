@@ -2,3 +2,5 @@ from app.models.core import Campaign, CampaignLocation, Country, District, Entit
 from app.models.history import CampaignRun, CampaignRunDistrict
 
 from app.models.school import SchoolProfile
+
+from app.models.auth import AppUser
