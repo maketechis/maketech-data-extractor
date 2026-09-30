@@ -12,3 +12,5 @@ openpyxl
 python-dotenv
 pytest
 pytest-asyncio
+PyJWT
+email-validator
