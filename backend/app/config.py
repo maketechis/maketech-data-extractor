@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     environment: str="development"
     debug: bool=True
     database_url: str="sqlite:///:memory:"
+    auth_secret: str="change-me-in-production"
     max_districts_per_campaign: int=1
     max_entities_per_district: int=100
     max_pages_per_domain: int=10
