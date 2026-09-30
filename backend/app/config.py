@@ -2,7 +2,7 @@ from functools import lru_cache
 from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-ROOT_ENV=Path(__file__).resolve().parents[3]/".env"
+ROOT_ENV=Path(__file__).resolve().parents[2]/".env"
 
 class Settings(BaseSettings):
     app_name: str="MakeTech Data Extractor"
