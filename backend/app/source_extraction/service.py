@@ -1,4 +1,5 @@
 import csv,io,re
+from openpyxl import load_workbook
 from dataclasses import asdict,dataclass
 from urllib.parse import urljoin
 import httpx
@@ -15,6 +16,14 @@ def extract_csv(text:str,url:str)->list[ExtractedEntity]:
         name=_pick(row,"school_name","school name","name","institution","institution name")
         if not name:continue
         out.append(ExtractedEntity(name,url,_pick(row,"address"),_pick(row,"pin","pincode","postal code"),_pick(row,"phone","mobile","telephone"),_pick(row,"email","e-mail"),_pick(row,"website","url"),_pick(row,"udise_code","udise code","code","id")))
+    return out
+def extract_xlsx(data:bytes,url:str)->list[ExtractedEntity]:
+    wb=load_workbook(io.BytesIO(data),read_only=True,data_only=True);ws=wb.active
+    rows=ws.iter_rows(values_only=True);headers=[str(x or "").strip() for x in next(rows,[])]
+    out=[]
+    for values in rows:
+        row=dict(zip(headers,[x if x is not None else "" for x in values]));name=_pick(row,"school_name","school name","name","institution","institution name")
+        if name:out.append(ExtractedEntity(name,url,_pick(row,"address"),_pick(row,"pin","pincode","postal code"),_pick(row,"phone","mobile","telephone"),_pick(row,"email","e-mail"),_pick(row,"website","url"),_pick(row,"udise_code","udise code","code","id")))
     return out
 def extract_html(text:str,url:str)->list[ExtractedEntity]:
     soup=BeautifulSoup(text,"html.parser");out=[];seen=set()
@@ -33,6 +42,7 @@ def extract_source(url:str,timeout:float=30)->dict:
     r=httpx.get(url,timeout=timeout,follow_redirects=True,headers={"User-Agent":"MakeTechDataExtractor/0.6"});r.raise_for_status()
     ct=r.headers.get("content-type","").lower();path=str(r.url).lower()
     if "csv" in ct or path.endswith(".csv"):rows=extract_csv(r.text,url);kind="csv"
+    elif "spreadsheet" in ct or path.endswith((".xlsx",".xlsm")):rows=extract_xlsx(r.content,url);kind="xlsx"
     elif "html" in ct or "<html" in r.text[:1000].lower():rows=extract_html(r.text,url);kind="html"
     else:return {"url":url,"kind":"unsupported","records":[],"count":0}
     return {"url":url,"kind":kind,"records":[asdict(x) for x in rows],"count":len(rows)}
