@@ -14,3 +14,5 @@ pytest
 pytest-asyncio
 PyJWT
 email-validator
+
+python-multipart
