@@ -1,1 +1,1 @@
-import "./globals.css";export default function Layout({children}:{children:React.ReactNode}){return <html><body>{children}</body></html>}
+import "./globals.css";import AppShell from "./components/AppShell";export default function Layout({children}:{children:React.ReactNode}){return <html><body><AppShell>{children}</AppShell></body></html>}
