@@ -15,6 +15,7 @@ class SourceDefinition:
 SOURCES={
     "osm":SourceDefinition("osm","OpenStreetMap",("bookseller","school"),("*",),True,"free",50,"Community geographic discovery"),
     "csv":SourceDefinition("csv","Versioned CSV Import",("*",),("*",),False,"free",10,"Official/open/manual dataset imports"),
+    "bihar_sanskrit":SourceDefinition("bihar_sanskrit","Bihar Sanskrit Shiksha Board",("school",),("IN",),True,"free",20,"Official Bihar institution registry with U-DISE codes"),
     "google_direct":SourceDefinition("google_direct","Direct Google Web Search",("*",),("*",),True,"free",70,"MVP supplemental and website discovery"),
 }
 
