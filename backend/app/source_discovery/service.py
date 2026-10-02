@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import asdict,dataclass
 from urllib.parse import urlparse
 from app.sources.search_settings import SearchSettings
 from app.sources.web_search import search_web
@@ -27,4 +27,4 @@ def discover_sources(*,entity_type:str,district:str,state:str,country:str,settin
             if key not in found or score>found[key].score:found[key]=item
     rows=sorted(found.values(),key=lambda x:(-x.score,x.url))
     for x in rows:metrics[x.engine]["sources"]+=1
-    return {"queries":len(discovery_queries(entity_type,district,state,country)),"metrics":metrics,"sources":[x.__dict__ for x in rows]}
+    return {"queries":len(discovery_queries(entity_type,district,state,country)),"metrics":metrics,"sources":[asdict(x) for x in rows]}
