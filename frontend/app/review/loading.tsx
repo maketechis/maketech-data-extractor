@@ -1,0 +1,1 @@
+export default function Loading(){return <main className="main"><h1>Needs Review</h1><p className="muted">Loading review queue...</p></main>}
