@@ -1,0 +1,1 @@
+"use client";export default function ErrorPage({reset}:{error:Error;reset:()=>void}){return <main className="main"><h1>Something went wrong</h1><p className="muted">The page could not load its backend data.</p><button className="btn" onClick={reset}>Try again</button></main>}
