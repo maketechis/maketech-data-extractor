@@ -1,0 +1,2 @@
+from app.orchestrator.source_pipeline import run_source_pipeline
+def test_module_exposes_unified_source_pipeline(): assert callable(run_source_pipeline)

@@ -12,7 +12,7 @@ def get_db():
 @router.get("")
 def campaigns(db:Session=Depends(get_db)):
     rows=db.scalars(select(Campaign).order_by(Campaign.id.desc()).limit(50)).all()
-    return [{"id":c.id,"name":c.name,"status":c.status.value,"stats":campaign_stats(db,c.id)} for c in rows]
+    return [{"id":c.id,"name":c.name,"status":c.status.value,"stats":campaign_stats(db,c.id),"search":{"google":c.search_google,"bing":c.search_bing,"yahoo":c.search_yahoo,"mode":c.search_mode}} for c in rows]
 @router.get("/{campaign_id}")
 def detail(campaign_id:int,db:Session=Depends(get_db)):
     c=db.get(Campaign,campaign_id)
