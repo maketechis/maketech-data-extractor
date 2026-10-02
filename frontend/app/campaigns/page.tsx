@@ -1,5 +1,5 @@
 "use client";import {useEffect,useState} from "react";
-const API=process.env.NEXT_PUBLIC_API_URL||"http://127.0.0.1:8000";
+const API="/api/backend";
 export default function Campaigns(){const [types,setTypes]=useState<any[]>([]),[countries,setCountries]=useState<any[]>([]),[states,setStates]=useState<any[]>([]),[districts,setDistricts]=useState<any[]>([]);const [name,setName]=useState("Siwan School Benchmark"),[type,setType]=useState(""),[country,setCountry]=useState(""),[state,setState]=useState(""),[district,setDistrict]=useState("");const [google,setGoogle]=useState(true),[bing,setBing]=useState(true),[yahoo,setYahoo]=useState(true),[mode,setMode]=useState("fallback"),[msg,setMsg]=useState("");
 useEffect(()=>{fetch(API+"/entity-types").then(r=>r.json()).then(setTypes);fetch(API+"/geography/countries").then(r=>r.json()).then(setCountries)},[]);
 useEffect(()=>{if(country)fetch(API+"/geography/countries/"+country+"/states").then(r=>r.json()).then(setStates)},[country]);

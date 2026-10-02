@@ -1,0 +1,4 @@
+import {NextRequest,NextResponse} from "next/server";
+const API=process.env.API_URL||"http://127.0.0.1:8000";
+async function proxy(req:NextRequest,{params}:{params:Promise<{path:string[]}>}){const {path}=await params;const target=new URL(API+"/"+path.join("/"));req.nextUrl.searchParams.forEach((v,k)=>target.searchParams.append(k,v));const body=["GET","HEAD"].includes(req.method)?undefined:await req.text();const r=await fetch(target,{method:req.method,headers:{"Content-Type":req.headers.get("content-type")||"application/json"},body,cache:"no-store"});return new NextResponse(await r.text(),{status:r.status,headers:{"content-type":r.headers.get("content-type")||"application/json"}})}
+export const GET=proxy;export const POST=proxy;export const PUT=proxy;export const PATCH=proxy;export const DELETE=proxy;
