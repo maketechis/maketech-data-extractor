@@ -1,2 +1,0 @@
-import {NextResponse} from "next/server";import {supabaseServer} from "../../../lib/supabase/server";
-export async function GET(req:Request){const origin=new URL(req.url).origin;const supabase=await supabaseServer();const {data,error}=await supabase.auth.signInWithOAuth({provider:"google",options:{redirectTo:origin+"/auth/callback"}});return error?NextResponse.redirect(origin+"/login?error=oauth"):NextResponse.redirect(data.url)}
