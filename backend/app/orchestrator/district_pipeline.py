@@ -1,6 +1,8 @@
 from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 from app.collector.adapters.osm_overpass import OSMOverpassAdapter
+from app.collector.adapters.web_search import WebSearchAdapter
+from app.sources.search_settings import SearchMode,SearchSettings
 from app.collector.engine import CollectorEngine
 from app.enrichment.district_job import run_district_enrichment
 from app.models.core import Campaign, CampaignLocation, Country, District, EntityType, LocationStatus, State
@@ -12,7 +14,11 @@ def process_district(db:Session,campaign:Campaign,location:CampaignLocation,*,ad
     country=db.get(Country,campaign.country_id); entity_type=db.get(EntityType,campaign.entity_type_id)
     location.status=LocationStatus.COLLECTING; location.started_at=location.started_at or utcnow(); location.attempts+=1; db.commit()
     try:
-        collected=CollectorEngine(adapters or [OSMOverpassAdapter()]).collect(db=db,entity_type=entity_type,country=country,state=state,district=district)
+        configured=adapters
+        if configured is None:
+            search=SearchSettings(google=campaign.search_google,bing=campaign.search_bing,yahoo=campaign.search_yahoo,mode=SearchMode(campaign.search_mode))
+            configured=[OSMOverpassAdapter(),WebSearchAdapter(search)] if search.enabled_engines() else [OSMOverpassAdapter()]
+        collected=CollectorEngine(configured).collect(db=db,entity_type=entity_type,country=country,state=state,district=district)
         location.records_found=collected["raw"]
         location.records_saved=collected["saved"]+collected.get("merged",0)
         location.status=LocationStatus.ENRICHING; db.commit()
