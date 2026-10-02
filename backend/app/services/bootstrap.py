@@ -20,3 +20,9 @@ def ensure_development_seed(db: Session):
         school=EntityType(name="School",slug="school"); db.add(school); db.flush()
     db.commit()
     return {"country_id":india.id,"state_id":bihar.id,"district_id":siwan.id,"bookseller_type_id":bookseller.id,"school_type_id":school.id}
+
+def bootstrap_core(db: Session):
+    before_countries = 1 if db.scalar(select(Country).where(Country.iso_code=="IN")) else 0
+    before_types = sum(1 for slug in ("school","bookseller") if db.scalar(select(EntityType).where(EntityType.slug==slug)))
+    ensure_development_seed(db)
+    return {"countries": 1-before_countries, "entity_types": 2-before_types}
