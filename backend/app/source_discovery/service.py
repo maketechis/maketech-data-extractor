@@ -1,0 +1,30 @@
+from dataclasses import dataclass
+from urllib.parse import urlparse
+from app.sources.search_settings import SearchSettings
+from app.sources.web_search import search_web
+@dataclass(slots=True)
+class DiscoveredSource:
+    url:str;title:str;engine:str;kind:str;score:int;query:str
+def classify(url:str,title:str)->tuple[str,int]:
+    u=url.lower();t=title.lower();score=0;kind="page"
+    if u.endswith(".pdf"):kind="pdf";score+=35
+    if u.endswith((".csv",".xlsx",".xls")):kind="dataset";score+=50
+    if any(x in u for x in (".gov.in","gov.in/")):kind="government_"+kind;score+=35
+    if any(x in t for x in ("list","directory","institutions","schools","affiliation","report")):score+=20
+    if any(x in t for x in ("siwan","district")):score+=10
+    return kind,min(score,100)
+def discovery_queries(entity_type:str,district:str,state:str,country:str)->list[str]:
+    return [f'{entity_type} list {district} {state}',f'{entity_type} directory {district} {state}',f'{entity_type} {district} {state} filetype:pdf',f'{entity_type} {district} {state} government list',f'{entity_type} institutions {district} {state}',f'{entity_type} affiliation list {district} {state}']
+def discover_sources(*,entity_type:str,district:str,state:str,country:str,settings:SearchSettings)->dict:
+    found={};metrics={x:{"results":0,"sources":0} for x in settings.enabled_engines()}
+    for q in discovery_queries(entity_type,district,state,country):
+        for hit in search_web(q,settings):
+            metrics.setdefault(hit.engine,{"results":0,"sources":0});metrics[hit.engine]["results"]+=1
+            kind,score=classify(hit.url,hit.title)
+            host=urlparse(hit.url).netloc.lower()
+            key=hit.url.split("#",1)[0]
+            item=DiscoveredSource(key,hit.title,hit.engine,kind,score,q)
+            if key not in found or score>found[key].score:found[key]=item
+    rows=sorted(found.values(),key=lambda x:(-x.score,x.url))
+    for x in rows:metrics[x.engine]["sources"]+=1
+    return {"queries":len(discovery_queries(entity_type,district,state,country)),"metrics":metrics,"sources":[x.__dict__ for x in rows]}
