@@ -11,7 +11,7 @@ def get_db():
 def entity_row(db,e):
     et=db.get(EntityType,e.entity_type_id);d=db.get(District,e.district_id) if e.district_id else None;s=db.get(State,e.state_id) if e.state_id else None
     contacts=db.scalars(select(EntityContact).where(EntityContact.entity_id==e.id)).all();sites=db.scalars(select(EntityWebsite).where(EntityWebsite.entity_id==e.id)).all();sources=db.scalars(select(EntitySource).where(EntitySource.entity_id==e.id)).all()
-    return {"id":e.id,"name":e.name,"type":et.name if et else None,"status":e.status,"state":s.name if s else None,"district":d.name if d else None,"address":e.address,"pin":e.pin,"phones":[x.value for x in contacts if x.contact_type=="phone"],"emails":[x.value for x in contacts if x.contact_type=="email"],"websites":[{"url":x.url,"status":x.verification_status} for x in sites],"source_count":len(sources)}
+    return {"id":e.id,"name":e.name,"type":et.name if et else None,"status":e.status,"state":s.name if s else None,"district":d.name if d else None,"address":e.address,"pin":e.pin,"phones":[x.value for x in contacts if x.contact_type=="phone"],"emails":[x.value for x in contacts if x.contact_type=="email"],"websites":[{"url":x.url,"status":x.verification_status} for x in sites],"source_count":len(sources),"sources":[{"type":x.source_type,"url":x.source_url,"record_id":x.source_record_id} for x in sources]}
 @router.get("/entities")
 def entities(status:str|None=None,limit:int=Query(200,ge=1,le=500),db:Session=Depends(get_db)):
     q=select(Entity).order_by(Entity.id.desc()).limit(limit)
