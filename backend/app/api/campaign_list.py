@@ -1,4 +1,4 @@
-from fastapi import APIRouter,Depends
+from fastapi import APIRouter,Depends,HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from app.database import SessionLocal
@@ -15,5 +15,7 @@ def campaigns(db:Session=Depends(get_db)):
     return [{"id":c.id,"name":c.name,"status":c.status.value,"stats":campaign_stats(db,c.id)} for c in rows]
 @router.get("/{campaign_id}")
 def detail(campaign_id:int,db:Session=Depends(get_db)):
-    c=db.get(Campaign,campaign_id);locations=db.execute(select(CampaignLocation,District.name).join(District,District.id==CampaignLocation.district_id).where(CampaignLocation.campaign_id==campaign_id).order_by(CampaignLocation.id)).all()
+    c=db.get(Campaign,campaign_id)
+    if not c: raise HTTPException(404,"Campaign not found")
+    locations=db.execute(select(CampaignLocation,District.name).join(District,District.id==CampaignLocation.district_id).where(CampaignLocation.campaign_id==campaign_id).order_by(CampaignLocation.id)).all()
     return {"id":c.id,"name":c.name,"status":c.status.value,"stats":campaign_stats(db,c.id),"districts":[{"name":name,"status":loc.status.value,"found":loc.records_found,"saved":loc.records_saved,"error":loc.last_error} for loc,name in locations]}
