@@ -23,11 +23,12 @@ from app.api.campaign_list import router as campaign_runs_router
 from app.api.ui_data import router as ui_router
 from app.api.campaign_start import router as campaign_start_router
 from app.api.school_data import router as school_data_router
+from app.api.official_school_sources import router as official_school_sources_router
 from app.config import get_settings
 
 settings=get_settings()
 app=FastAPI(title=settings.app_name,version="0.5.0",description="District-wise entity collection and enrichment platform")
-for router in (geography_router,campaigns_router,collector_router,jobs_router,campaign_control_router,enrichment_router,verification_router,enrichment_jobs_router,pipeline_router,exports_router,history_router,sources_router,geography_validation_router,source_policy_router,google_discovery_router,web_search_router,benchmarks_router,auth_router,dashboard_router,entity_types_router,campaign_runs_router,ui_router,campaign_start_router,school_data_router):
+for router in (geography_router,campaigns_router,collector_router,jobs_router,campaign_control_router,enrichment_router,verification_router,enrichment_jobs_router,pipeline_router,exports_router,history_router,sources_router,geography_validation_router,source_policy_router,google_discovery_router,web_search_router,benchmarks_router,auth_router,dashboard_router,entity_types_router,campaign_runs_router,ui_router,campaign_start_router,school_data_router,official_school_sources_router):
     app.include_router(router)
 
 @app.get("/")
