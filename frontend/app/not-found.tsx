@@ -1,0 +1,1 @@
+export default function NotFound(){return <main className="main"><h1>Page not found</h1><p className="muted">The requested application page does not exist.</p><a className="btn" href="/">Return to Dashboard</a></main>}
