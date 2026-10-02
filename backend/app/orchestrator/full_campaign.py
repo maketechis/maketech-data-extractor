@@ -19,5 +19,9 @@ def run_next_full_district(db:Session,campaign_id:int,*,adapters=None,enrichment
         return {"campaign_id":campaign_id,"campaign_run_id":run.id,"status":"no_pending_districts","stats":stats}
     campaign.status=CampaignStatus.RUNNING; db.commit()
     result=process_district(db,campaign,location,adapters=adapters,enrichment_limit=enrichment_limit,max_pages=max_pages)
+    stats=campaign_stats(db,campaign_id)
+    if stats["pending"]==0 and stats["running"]==0:
+        campaign.status=CampaignStatus.COMPLETED if stats["failed"]==0 else CampaignStatus.FAILED
+        db.commit()
     sync_run(db,run,campaign.status)
-    return {"campaign_id":campaign_id,"campaign_run_id":run.id,**result,"campaign_stats":campaign_stats(db,campaign_id)}
+    return {"campaign_id":campaign_id,"campaign_run_id":run.id,"campaign_status":campaign.status.value,**result,"campaign_stats":stats}

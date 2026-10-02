@@ -10,5 +10,5 @@ class WebSearchAdapter(CollectorAdapter):
         rows=[]
         for q in build_discovery_queries(entity_type=entity_type,district=district,state=state,country=country):
             for hit in search_web(q.query,self.settings):
-                rows.append(RawEntity(name=hit.title,website=hit.url,source_type=hit.engine,source_url=hit.url,raw={"query":q.query,"engine":hit.engine}))
+                rows.append(RawEntity(name=hit.title,website=hit.url,source_name=hit.engine,source_url=hit.url,attributes={"query":q.query,"engine":hit.engine}))
         return rows
