@@ -1,6 +1,6 @@
 import re
 from urllib.parse import urlparse
-SCHOOL_TERMS=("school","vidyal","academy","madrasa","विद्यालय","स्कूल")
+SCHOOL_TERMS=("school","vidyal","academy","madrasa","inter college","u.m.s","p.s.","m.s.","h.s.","विद्यालय","स्कूल")
 BAD_NAMES=("institutions","institution","schools","school list","directory")
 def validate_record(row:dict,*,district:str,state:str)->tuple[bool,str]:
     name=" ".join(str(row.get("name") or "").split());low=name.casefold()
