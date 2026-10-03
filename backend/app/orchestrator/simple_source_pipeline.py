@@ -5,13 +5,18 @@ from app.source_extraction.service import extract_source
 from app.source_extraction.persist import persist_extracted
 from app.source_extraction.validation import filter_records
 from app.sources.google_direct import search_google_pages
+from app.config import get_settings
 def query_for(et,district,state,country):return f"{et} list of {district}"
 def discover_and_store(db:Session,campaign:Campaign,district:District,pages:int=5):
     et=db.get(EntityType,campaign.entity_type_id);state=db.get(State,district.state_id);country=db.get(Country,campaign.country_id);q=query_for(et.slug,district.name,state.name,country.name)
     existing=db.scalars(select(CampaignSource).where(CampaignSource.campaign_id==campaign.id,CampaignSource.district_id==district.id)).all()
     completed_pages={x.page_number for x in existing}
     if len(completed_pages)>=pages:return {"query":q,"pages":pages,"results":len(existing),"sources_saved":0,"page_diagnostics":[{"page":p,"status":"cached","results":sum(1 for x in existing if x.page_number==p),"error":None} for p in range(1,pages+1)],"status":"cached"}
-    hits,diagnostics=search_google_pages(q,pages=pages,delay_seconds=20);created=0
+    if get_settings().environment=="desktop":
+        from app.sources.browser_google import acquire_google
+        hits,diagnostics=acquire_google(q,pages=pages,delay_seconds=20,headless=False)
+    else:hits,diagnostics=search_google_pages(q,pages=pages,delay_seconds=20)
+    created=0
     for hit in hits:
         if db.scalar(select(CampaignSource.id).where(CampaignSource.campaign_id==campaign.id,CampaignSource.url==hit.url)):continue
         db.add(CampaignSource(campaign_id=campaign.id,district_id=district.id,engine="google",query=q,page_number=hit.page,rank=hit.rank,title=hit.title,url=hit.url));created+=1
