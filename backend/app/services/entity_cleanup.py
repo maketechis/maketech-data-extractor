@@ -19,4 +19,4 @@ def merge_exact_duplicates(db:Session)->dict:
         if not keep.address and e.address:keep.address=e.address
         if not keep.pin and e.pin:keep.pin=e.pin
         db.delete(e);merged+=1
-    db.commit();return {"duplicates_merged":merged}
+    db.flush();return {"duplicates_merged":merged}
