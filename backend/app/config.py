@@ -7,7 +7,7 @@ def desktop_data_dir()->Path:
     override=os.getenv("MAKETECH_DATA_DIR")
     if override:return Path(override).expanduser()
     if os.name=="nt":base=Path(os.getenv("LOCALAPPDATA",Path.home()/"AppData"/"Local"))
-    elif os.uname().sysname=="Darwin":base=Path.home()/"Library"/"Application Support"
+    elif __import__("platform").system()=="Darwin":base=Path.home()/"Library"/"Application Support"
     else:base=Path(os.getenv("XDG_DATA_HOME",Path.home()/".local"/"share"))
     return base/"MakeTech Data Extractor"
 def default_database_url()->str:
