@@ -14,12 +14,13 @@ jobs:
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
       - run: pip install -r backend/requirements.txt pyinstaller
-      - run: playwright install chromium
-      - run: pyinstaller --noconfirm --onefile --name maketech-backend --paths backend backend/app/desktop.py
+      - run: pyinstaller --noconfirm --onefile --name maketech-backend --paths backend --collect-all playwright --collect-all pypdf backend/app/desktop.py
       - run: npm install
         working-directory: frontend
       - run: npm run build
         working-directory: frontend
+        env:
+          NEXT_PUBLIC_DESKTOP: "1"
       - run: npm install
         working-directory: desktop
       - run: npm run build
@@ -27,4 +28,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: MakeTech-Data-Extractor-Windows
-          path: desktop/src-tauri/target/release/bundle/**
+          path: |
+            desktop/src-tauri/target/release/bundle/nsis/*.exe
+            desktop/src-tauri/target/release/bundle/msi/*.msi

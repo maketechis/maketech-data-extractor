@@ -1,0 +1,1 @@
+export const BACKEND_URL=(typeof window!=="undefined"&&window.location.protocol==="tauri:")?"http://127.0.0.1:8000":"/api/backend";
