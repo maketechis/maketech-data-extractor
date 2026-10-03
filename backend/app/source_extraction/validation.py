@@ -7,7 +7,7 @@ def validate_record(row:dict,*,district:str,state:str)->tuple[bool,str]:
     if len(name)<4:return False,"name_too_short"
     if low in BAD_NAMES:return False,"generic_heading"
     if not any(x in low for x in SCHOOL_TERMS):return False,"not_school_like"
-    if "board" in low and "school" not in low:return False,"organization_not_school"
+    if any(x in low for x in ("examination board","education board","school examination board","council","directorate","department of education")):return False,"organization_not_school"
     website=row.get("website")
     if website:
         host=urlparse(website).netloc.casefold()
