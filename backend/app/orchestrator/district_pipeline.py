@@ -17,8 +17,8 @@ def process_district(db:Session,campaign:Campaign,location:CampaignLocation,*,ad
         configured=adapters
         if configured is None:
             search=SearchSettings(google=campaign.search_google,bing=campaign.search_bing,yahoo=campaign.search_yahoo,mode=SearchMode(campaign.search_mode))
-            configured=[OSMOverpassAdapter(),WebSearchAdapter(search)] if search.enabled_engines() else [OSMOverpassAdapter()]
-        collected=CollectorEngine(configured).collect(db=db,entity_type=entity_type,country=country,state=state,district=district)
+            configured=[WebSearchAdapter(search)] if search.enabled_engines() else []
+        collected=CollectorEngine(configured).collect(db=db,entity_type=entity_type,country=country,state=state,district=district) if configured else {"raw":0,"unique":0,"saved":0,"merged":0,"needs_review":0}
         location.records_found=collected["raw"]
         location.records_saved=collected["saved"]+collected.get("merged",0)
         location.status=LocationStatus.ENRICHING; db.commit()
