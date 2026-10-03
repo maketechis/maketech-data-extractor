@@ -1,4 +1,4 @@
-"use client";import {useEffect,useState} from "react";import {useParams} from "next/navigation";const API="/api/backend";
+"use client";import {useEffect,useState} from "react";import {useParams} from "next/navigation";const API=process.env.NEXT_PUBLIC_DESKTOP==="1"?"http://127.0.0.1:8000":"/api/backend";
 export default function Campaign(){const {id}=useParams<{id:string}>();const [data,setData]=useState<any>(null),[sources,setSources]=useState<any[]>([]),[busy,setBusy]=useState(false),[msg,setMsg]=useState("");
 async function load(){const [a,b]=await Promise.all([fetch(API+"/campaign-runs/"+id),fetch(API+"/campaign-sources/"+id)]);if(a.ok)setData(await a.json());if(b.ok)setSources(await b.json())}useEffect(()=>{load();const t=setInterval(load,3000);return()=>clearInterval(t)},[id]);
 async function start(){setBusy(true);const r=await fetch(API+"/campaign-start/"+id,{method:"POST"});const x=await r.json();setMsg(x.status==="failed"?"Campaign failed: "+(x.error||x.detail||"See district error below."):"Campaign pipeline finished.");setBusy(false);load()}
