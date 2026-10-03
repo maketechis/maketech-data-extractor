@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from urllib.parse import urlparse
+import xml.etree.ElementTree as ET
 import httpx
 from bs4 import BeautifulSoup
 from app.sources.google_direct import search_google
@@ -25,7 +26,18 @@ def _generic_search(url,query,engine,limit,timeout=15.0):
         seen.add(href);out.append(WebSearchResult(engine,title,href))
         if len(out)>=limit:break
     return out
-def search_bing(q,limit=10):return _generic_search("https://www.bing.com/search",q,"bing",limit)
+def search_bing(q,limit=10):
+    try:return _generic_search("https://www.bing.com/search",q,"bing",limit)
+    except Exception as first:
+        headers={"User-Agent":"Mozilla/5.0 (compatible; MakeTechDataExtractor/0.1)"}
+        with httpx.Client(timeout=15,headers=headers,follow_redirects=True) as client:r=client.get("https://www.bing.com/search",params={"q":q,"format":"rss"});r.raise_for_status()
+        try:
+            root=ET.fromstring(r.text);out=[]
+            for item in root.findall(".//item")[:limit]:
+                title=(item.findtext("title") or "").strip();url=(item.findtext("link") or "").strip()
+                if title and url:out.append(WebSearchResult("bing",title,url))
+            return out
+        except Exception:raise first
 def search_yahoo(q,limit=10):return _generic_search("https://search.yahoo.com/search",q,"yahoo",limit)
 def search_engine(engine,query,limit):
     if engine=="google":return [WebSearchResult("google",x.title,x.url) for x in search_google(query,limit=limit)]

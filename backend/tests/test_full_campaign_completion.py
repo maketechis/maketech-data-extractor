@@ -7,7 +7,9 @@ def test_last_district_finalizes_campaign(monkeypatch):
     engine=create_engine("sqlite:///:memory:");Base.metadata.create_all(engine)
     with Session(engine) as db:
         c=Country(name="India",iso_code="IN");t=EntityType(name="School",slug="school");db.add_all([c,t]);db.flush();s=State(country_id=c.id,name="Bihar");db.add(s);db.flush();d=District(state_id=s.id,name="Siwan",normalized_name="siwan");db.add(d);db.flush();camp=Campaign(name="x",entity_type_id=t.id,country_id=c.id,status=CampaignStatus.QUEUED);db.add(camp);db.flush();loc=CampaignLocation(campaign_id=camp.id,state_id=s.id,district_id=d.id,status=LocationStatus.PENDING);db.add(loc);db.commit()
-        monkeypatch.setattr("app.orchestrator.full_campaign.process_district",lambda db,campaign,location,**kw:(setattr(location,"status",LocationStatus.COMPLETED),db.commit(),{"status":"completed"})[-1])
+        monkeypatch.setattr("app.orchestrator.full_campaign.run_source_pipeline",lambda *a,**k:{"discovery":{"sources":0,"engines":{}},"extraction":{"raw_records":0,"saved":0,"merged":0,"runs":[]}})
+        monkeypatch.setattr("app.orchestrator.full_campaign.merge_exact_duplicates",lambda db:{"duplicates_merged":0})
+        monkeypatch.setattr("app.orchestrator.full_campaign.process_district",lambda db,campaign,location,**kw:(setattr(location,"status",LocationStatus.COMPLETED),db.commit(),{"status":"completed","collection":{"raw":0},"enrichment":{}})[-1])
         result=run_next_full_district(db,camp.id)
         db.refresh(camp)
         assert camp.status==CampaignStatus.COMPLETED

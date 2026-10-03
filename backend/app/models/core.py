@@ -75,7 +75,7 @@ class Campaign(Base):
     __tablename__="campaigns"
     id: Mapped[int]=mapped_column(primary_key=True); name: Mapped[str]=mapped_column(String(200))
     entity_type_id: Mapped[int]=mapped_column(ForeignKey("entity_types.id"), index=True); country_id: Mapped[int]=mapped_column(ForeignKey("countries.id"), index=True)
-    collection_level: Mapped[str]=mapped_column(String(30), default="district"); search_google: Mapped[bool]=mapped_column(Boolean,default=True); search_bing: Mapped[bool]=mapped_column(Boolean,default=True); search_yahoo: Mapped[bool]=mapped_column(Boolean,default=True); search_mode: Mapped[str]=mapped_column(String(20),default="fallback"); status: Mapped[CampaignStatus]=mapped_column(Enum(CampaignStatus), default=CampaignStatus.DRAFT, index=True)
+    collection_level: Mapped[str]=mapped_column(String(30), default="district"); search_google: Mapped[bool]=mapped_column(Boolean,default=True); search_bing: Mapped[bool]=mapped_column(Boolean,default=True); search_yahoo: Mapped[bool]=mapped_column(Boolean,default=True); search_mode: Mapped[str]=mapped_column(String(20),default="fallback"); quality_status: Mapped[str]=mapped_column(String(30),default="unknown"); quality_json: Mapped[str|None]=mapped_column(Text,nullable=True); status: Mapped[CampaignStatus]=mapped_column(Enum(CampaignStatus), default=CampaignStatus.DRAFT, index=True)
     created_at: Mapped[datetime]=mapped_column(DateTime(timezone=True), default=utcnow)
 class CampaignLocation(Base):
     __tablename__="campaign_locations"; __table_args__=(UniqueConstraint("campaign_id","district_id"),)
