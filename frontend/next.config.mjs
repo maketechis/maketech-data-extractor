@@ -1,3 +1,4 @@
 /** @type {import('next').NextConfig} */
-const nextConfig={output:"export",images:{unoptimized:true},trailingSlash:true};
+const desktop=process.env.NEXT_PUBLIC_DESKTOP==="1";
+const nextConfig=desktop?{output:"export",images:{unoptimized:true},trailingSlash:true}:{};
 export default nextConfig;
