@@ -84,3 +84,9 @@ class CampaignLocation(Base):
     status: Mapped[LocationStatus]=mapped_column(Enum(LocationStatus), default=LocationStatus.PENDING, index=True); attempts: Mapped[int]=mapped_column(Integer, default=0)
     records_found: Mapped[int]=mapped_column(Integer, default=0); records_saved: Mapped[int]=mapped_column(Integer, default=0)
     last_error: Mapped[str|None]=mapped_column(Text, nullable=True); started_at: Mapped[datetime|None]=mapped_column(DateTime(timezone=True), nullable=True); completed_at: Mapped[datetime|None]=mapped_column(DateTime(timezone=True), nullable=True)
+
+class CampaignSource(Base):
+    __tablename__="campaign_sources";__table_args__=(UniqueConstraint("campaign_id","url",name="uq_campaign_source_url"),)
+    id:Mapped[int]=mapped_column(primary_key=True);campaign_id:Mapped[int]=mapped_column(ForeignKey("campaigns.id",ondelete="CASCADE"),index=True);district_id:Mapped[int]=mapped_column(ForeignKey("districts.id"),index=True)
+    engine:Mapped[str]=mapped_column(String(30));query:Mapped[str]=mapped_column(Text);page_number:Mapped[int]=mapped_column(Integer);rank:Mapped[int]=mapped_column(Integer);title:Mapped[str]=mapped_column(Text);url:Mapped[str]=mapped_column(Text)
+    status:Mapped[str]=mapped_column(String(30),default="pending");records_raw:Mapped[int]=mapped_column(Integer,default=0);records_accepted:Mapped[int]=mapped_column(Integer,default=0);records_saved:Mapped[int]=mapped_column(Integer,default=0);last_error:Mapped[str|None]=mapped_column(Text,nullable=True)
