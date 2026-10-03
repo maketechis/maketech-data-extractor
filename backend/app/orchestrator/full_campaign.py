@@ -17,7 +17,7 @@ def _quality(source_result,result,duplicates_merged):
     enriched=enrichment.get("complete",0)+enrichment.get("partial",0)
     score=min(100,(20 if engine_success else 0)+(20 if source_result["discovery"]["sources"] else 0)+(30 if extracted>=10 else 15 if extracted>0 else 0)+(10 if direct>0 else 0)+(20 if enriched>0 else 0))
     status="healthy" if score>=70 else "partial" if score>=40 else "degraded"
-    return {"score":score,"status":status,"engine_successes":engine_success,"sources_discovered":source_result["discovery"]["sources"],"source_records":extracted,"direct_records":direct,"enriched_entities":enriched,"duplicates_merged":duplicates_merged}
+    return {"score":score,"status":status,"engine_successes":engine_success,"sources_discovered":source_result["discovery"]["sources"],"source_records":extracted,"direct_records":direct,"enriched_entities":enriched,"duplicates_merged":duplicates_merged,"engines":engines,"source_extraction":source_result["extraction"]}
 
 def run_next_full_district(db:Session,campaign_id:int,*,adapters=None,enrichment_limit=25,max_pages=5):
     campaign=db.get(Campaign,campaign_id)
