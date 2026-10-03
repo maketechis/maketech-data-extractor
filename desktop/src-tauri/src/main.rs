@@ -1,0 +1,1 @@
+fn main(){maketech_data_extractor_lib::run();}
