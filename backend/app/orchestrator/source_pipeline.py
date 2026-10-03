@@ -14,7 +14,7 @@ def run_source_pipeline(db:Session,campaign:Campaign,district:District,max_sourc
     for src in discovered["sources"][:max_sources]:
         if src["score"]<20:continue
         try:
-            data=extract_source(src["url"])
+            data=extract_source(src["url"],district=district.name)
             if not data["records"]:source_runs.append({"url":src["url"],"status":"empty","records":0});continue
             valid,validation=filter_records(data["records"],district=district.name,state=state.name)
             if not valid:source_runs.append({"url":src["url"],"status":"rejected","records":data["count"],"validation":validation});continue
