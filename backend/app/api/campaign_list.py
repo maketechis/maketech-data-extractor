@@ -1,3 +1,4 @@
+import json
 from fastapi import APIRouter,Depends,HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -12,7 +13,7 @@ def get_db():
 @router.get("")
 def campaigns(db:Session=Depends(get_db)):
     rows=db.scalars(select(Campaign).order_by(Campaign.id.desc()).limit(50)).all()
-    return [{"id":c.id,"name":c.name,"status":c.status.value,"stats":campaign_stats(db,c.id),"search":{"google":c.search_google,"bing":c.search_bing,"yahoo":c.search_yahoo,"mode":c.search_mode}} for c in rows]
+    return [{"id":c.id,"name":c.name,"status":c.status.value,"stats":campaign_stats(db,c.id),"search":{"google":c.search_google,"bing":c.search_bing,"yahoo":c.search_yahoo,"mode":c.search_mode},"quality":{"status":c.quality_status,**(json.loads(c.quality_json) if c.quality_json else {})},"quality":{"status":c.quality_status,**(json.loads(c.quality_json) if c.quality_json else {})}} for c in rows]
 @router.get("/{campaign_id}")
 def detail(campaign_id:int,db:Session=Depends(get_db)):
     c=db.get(Campaign,campaign_id)
