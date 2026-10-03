@@ -1,0 +1,30 @@
+name: Desktop Windows Installer
+on:
+  workflow_dispatch:
+  push:
+    tags: ["desktop-v*"]
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v5
+        with: {node-version: "24"}
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install -r backend/requirements.txt pyinstaller
+      - run: playwright install chromium
+      - run: pyinstaller --noconfirm --onefile --name maketech-backend --paths backend backend/app/desktop.py
+      - run: npm install
+        working-directory: frontend
+      - run: npm run build
+        working-directory: frontend
+      - run: npm install
+        working-directory: desktop
+      - run: npm run build
+        working-directory: desktop
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MakeTech-Data-Extractor-Windows
+          path: desktop/src-tauri/target/release/bundle/**
