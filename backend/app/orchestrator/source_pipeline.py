@@ -10,15 +10,16 @@ def run_source_pipeline(db:Session,campaign:Campaign,district:District,max_sourc
     state=db.get(State,district.state_id);country=db.get(Country,campaign.country_id);et=db.get(EntityType,campaign.entity_type_id)
     settings=SearchSettings(google=campaign.search_google,bing=campaign.search_bing,yahoo=campaign.search_yahoo,mode=SearchMode.ALL,max_results=10)
     discovered=discover_sources(entity_type=et.slug,district=district.name,state=state.name,country=country.name,settings=settings)
-    extracted=saved=merged=0;source_runs=[]
+    raw_seen=extracted=saved=merged=0;source_runs=[]
     for src in discovered["sources"][:max_sources]:
         if src["score"]<20:continue
         try:
             data=extract_source(src["url"],district=district.name)
+            raw_seen+=data["count"]
             if not data["records"]:source_runs.append({"url":src["url"],"status":"empty","records":0});continue
             valid,validation=filter_records(data["records"],district=district.name,state=state.name)
             if not valid:source_runs.append({"url":src["url"],"status":"rejected","records":data["count"],"validation":validation});continue
             result=persist_extracted(db,valid,entity_type=et,country=country,state=state,district=district)
             extracted+=len(valid);saved+=result["saved"];merged+=result["merged"];source_runs.append({"url":src["url"],"status":"extracted","records":data["count"],"accepted":len(valid),"saved":result["saved"],"merged":result["merged"],"validation":validation})
         except Exception as exc:source_runs.append({"url":src["url"],"status":"failed","error":type(exc).__name__})
-    return {"discovery":{"queries":discovered["queries"],"metrics":discovered["metrics"],"engines":discovered["engines"],"sources":len(discovered["sources"]),"status":"success" if discovered["sources"] else "degraded"},"extraction":{"sources_attempted":len(source_runs),"raw_records":extracted,"saved":saved,"merged":merged,"runs":source_runs}}
+    return {"discovery":{"queries":discovered["queries"],"metrics":discovered["metrics"],"engines":discovered["engines"],"sources":len(discovered["sources"]),"status":"success" if discovered["sources"] else "degraded"},"extraction":{"sources_attempted":len(source_runs),"raw_records":raw_seen,"accepted_records":extracted,"rejected_records":raw_seen-extracted,"saved":saved,"merged":merged,"runs":source_runs}}
