@@ -25,6 +25,11 @@ def discover_sources(*,entity_type:str,district:str,state:str,country:str,settin
             key=hit.url.split("#",1)[0]
             item=DiscoveredSource(key,hit.title,hit.engine,kind,score,q)
             if key not in found or score>found[key].score:found[key]=item
+    if entity_type=="school" and state.casefold()=="bihar":
+        from app.services.bihar_school_sources import BSSB_URL
+        kind,score=classify(BSSB_URL,"Bihar Sanskrit Shiksha Board institutions")
+        found.setdefault(BSSB_URL,DiscoveredSource(BSSB_URL,"Bihar Sanskrit Shiksha Board institutions","registry",kind,max(score,70),"registered official source"))
+        metrics.setdefault("registry",{"results":1,"sources":0})
     rows=sorted(found.values(),key=lambda x:(-x.score,x.url))
     for x in rows:metrics[x.engine]["sources"]+=1
     return {"queries":len(discovery_queries(entity_type,district,state,country)),"metrics":metrics,"engines":{k:asdict(v) for k,v in diagnostics.items()},"sources":[asdict(x) for x in rows]}
