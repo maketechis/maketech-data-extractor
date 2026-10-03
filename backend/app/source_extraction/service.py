@@ -28,13 +28,15 @@ def extract_xlsx(data:bytes,url:str)->list[ExtractedEntity]:
     return out
 def _schoolish(value:str)->bool:
     v=value.casefold()
-    return any(k in v for k in ("school","vidyal","academy","institution","madrasa","विद्यालय","स्कूल"))
-def extract_pdf(data:bytes,url:str)->list[ExtractedEntity]:
+    return any(k in v for k in ("school","vidyal","academy","institution","madrasa","inter college","u.m.s","p.s.","m.s.","h.s.","विद्यालय","स्कूल"))
+def extract_pdf(data:bytes,url:str,district:str|None=None)->list[ExtractedEntity]:
     reader=PdfReader(io.BytesIO(data));out=[];seen=set()
     for page in reader.pages:
         lines=[re.sub("[ \\t]+"," ",x).strip() for x in (page.extract_text() or "").splitlines()]
         for i,line in enumerate(lines):
             if not (3<=len(line)<=220 and _schoolish(line)):continue
+            context=" ".join(lines[max(0,i-4):min(len(lines),i+5)])
+            if district and district.casefold() not in context.casefold():continue
             key=line.casefold()
             if key in seen:continue
             seen.add(key);window=" ".join(lines[max(0,i-1):min(len(lines),i+2)])
@@ -61,12 +63,12 @@ def extract_html(text:str,url:str)->list[ExtractedEntity]:
         if key in seen:continue
         seen.add(key);out.append(ExtractedEntity(value,url,website=urljoin(url,node.get("href")) if node.name=="a" and node.get("href") else None))
     return out
-def extract_source(url:str,timeout:float=30)->dict:
+def extract_source(url:str,timeout:float=30,*,district:str|None=None)->dict:
     r=httpx.get(url,timeout=timeout,follow_redirects=True,headers={"User-Agent":"MakeTechDataExtractor/0.6"});r.raise_for_status()
     ct=r.headers.get("content-type","").lower();path=str(r.url).lower()
     if "csv" in ct or path.endswith(".csv"):rows=extract_csv(r.text,url);kind="csv"
     elif "spreadsheet" in ct or path.endswith((".xlsx",".xlsm")):rows=extract_xlsx(r.content,url);kind="xlsx"
-    elif "pdf" in ct or path.endswith(".pdf"):rows=extract_pdf(r.content,url);kind="pdf"
+    elif "pdf" in ct or path.endswith(".pdf"):rows=extract_pdf(r.content,url,district=district);kind="pdf"
     elif "html" in ct or "<html" in r.text[:1000].lower():rows=extract_html(r.text,url);kind="html"
     else:return {"url":url,"kind":"unsupported","records":[],"count":0}
     return {"url":url,"kind":kind,"records":[asdict(x) for x in rows],"count":len(rows)}
