@@ -12,7 +12,7 @@ from app.services.source_entity_cleanup import cleanup_invalid_source_entities
 def _quality(source_result,result,duplicates_merged):
     d=source_result["discovery"];x=source_result["extraction"];direct=result.get("collection",{}).get("raw",0);enrichment=result.get("enrichment",{});enriched=enrichment.get("complete",0)+enrichment.get("partial",0)
     score=min(100,(30 if d["results"]>0 else 0)+(30 if x["accepted"]>=10 else 15 if x["accepted"]>0 else 0)+(20 if direct>0 else 0)+(20 if enriched>0 else 0));status="healthy" if score>=70 else "partial" if score>=40 else "degraded"
-    return {"score":score,"status":status,"google_query":d["query"],"google_pages":d["pages"],"google_results":d["results"],"sources_saved":d["sources_saved"],"raw_source_records":x["raw"],"source_records":x["accepted"],"source_records_saved":x["saved"],"failed_sources":x["failed_sources"],"direct_records":direct,"enriched_entities":enriched,"duplicates_merged":duplicates_merged}
+    return {"score":score,"status":status,"google_query":d["query"],"google_pages":d["pages"],"google_results":d["results"],"google_page_diagnostics":d.get("page_diagnostics",[]),"sources_saved":d["sources_saved"],"raw_source_records":x["raw"],"source_records":x["accepted"],"source_records_saved":x["saved"],"failed_sources":x["failed_sources"],"direct_records":direct,"enriched_entities":enriched,"duplicates_merged":duplicates_merged}
 def run_next_full_district(db:Session,campaign_id:int,*,adapters=None,enrichment_limit=25,max_pages=5):
     campaign=db.get(Campaign,campaign_id)
     if not campaign:raise ValueError("Campaign not found")
