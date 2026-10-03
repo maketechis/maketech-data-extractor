@@ -20,4 +20,4 @@ def cleanup_invalid_source_entities(db:Session,*,district_name:str,state_name:st
         for x in db.scalars(select(EntityWebsite).where(EntityWebsite.entity_id==e.id)).all():db.delete(x)
         for x in db.scalars(select(EntitySource).where(EntitySource.entity_id==e.id)).all():db.delete(x)
         db.delete(e);removed+=1
-    db.commit();return {"invalid_entities_removed":removed,"search_websites_removed":websites_removed}
+    db.flush();return {"invalid_entities_removed":removed,"search_websites_removed":websites_removed}
