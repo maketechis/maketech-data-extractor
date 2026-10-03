@@ -18,4 +18,4 @@ def run_source_pipeline(db:Session,campaign:Campaign,district:District,max_sourc
             result=persist_extracted(db,data["records"],entity_type=et,country=country,state=state,district=district)
             extracted+=data["count"];saved+=result["saved"];merged+=result["merged"];source_runs.append({"url":src["url"],"status":"extracted","records":data["count"],"saved":result["saved"],"merged":result["merged"]})
         except Exception as exc:source_runs.append({"url":src["url"],"status":"failed","error":type(exc).__name__})
-    return {"discovery":{"queries":discovered["queries"],"metrics":discovered["metrics"],"sources":len(discovered["sources"])},"extraction":{"sources_attempted":len(source_runs),"raw_records":extracted,"saved":saved,"merged":merged,"runs":source_runs}}
+    return {"discovery":{"queries":discovered["queries"],"metrics":discovered["metrics"],"engines":discovered["engines"],"sources":len(discovered["sources"]),"status":"success" if discovered["sources"] else "degraded"},"extraction":{"sources_attempted":len(source_runs),"raw_records":extracted,"saved":saved,"merged":merged,"runs":source_runs}}

@@ -1,7 +1,7 @@
 from dataclasses import asdict,dataclass
 from urllib.parse import urlparse
 from app.sources.search_settings import SearchSettings
-from app.sources.web_search import search_web
+from app.sources.web_search import EngineDiagnostic,search_web_diagnostic
 @dataclass(slots=True)
 class DiscoveredSource:
     url:str;title:str;engine:str;kind:str;score:int;query:str
@@ -16,9 +16,9 @@ def classify(url:str,title:str)->tuple[str,int]:
 def discovery_queries(entity_type:str,district:str,state:str,country:str)->list[str]:
     return [f'{entity_type} list {district} {state}',f'{entity_type} directory {district} {state}',f'{entity_type} {district} {state} filetype:pdf',f'{entity_type} {district} {state} government list',f'{entity_type} institutions {district} {state}',f'{entity_type} affiliation list {district} {state}']
 def discover_sources(*,entity_type:str,district:str,state:str,country:str,settings:SearchSettings)->dict:
-    found={};metrics={x:{"results":0,"sources":0} for x in settings.enabled_engines()}
+    found={};metrics={x:{"results":0,"sources":0} for x in settings.enabled_engines()};diagnostics={x:EngineDiagnostic(x) for x in settings.enabled_engines()}
     for q in discovery_queries(entity_type,district,state,country):
-        for hit in search_web(q,settings):
+        for hit in search_web_diagnostic(q,settings,diagnostics):
             metrics.setdefault(hit.engine,{"results":0,"sources":0});metrics[hit.engine]["results"]+=1
             kind,score=classify(hit.url,hit.title)
             host=urlparse(hit.url).netloc.lower()
@@ -27,4 +27,4 @@ def discover_sources(*,entity_type:str,district:str,state:str,country:str,settin
             if key not in found or score>found[key].score:found[key]=item
     rows=sorted(found.values(),key=lambda x:(-x.score,x.url))
     for x in rows:metrics[x.engine]["sources"]+=1
-    return {"queries":len(discovery_queries(entity_type,district,state,country)),"metrics":metrics,"sources":[asdict(x) for x in rows]}
+    return {"queries":len(discovery_queries(entity_type,district,state,country)),"metrics":metrics,"engines":{k:asdict(v) for k,v in diagnostics.items()},"sources":[asdict(x) for x in rows]}
