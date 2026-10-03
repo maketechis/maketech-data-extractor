@@ -32,14 +32,14 @@ def _schoolish(value:str)->bool:
 def extract_pdf(data:bytes,url:str)->list[ExtractedEntity]:
     reader=PdfReader(io.BytesIO(data));out=[];seen=set()
     for page in reader.pages:
-        lines=[re.sub(r"\\s+"," ",x).strip() for x in (page.extract_text() or "").splitlines()]
+        lines=[re.sub("[ \\t]+"," ",x).strip() for x in (page.extract_text() or "").splitlines()]
         for i,line in enumerate(lines):
             if not (3<=len(line)<=220 and _schoolish(line)):continue
             key=line.casefold()
             if key in seen:continue
             seen.add(key);window=" ".join(lines[max(0,i-1):min(len(lines),i+2)])
-            pin=next(iter(re.findall(r"(?<!\\d)\\d{6}(?!\\d)",window)),None)
-            code=next(iter(re.findall(r"(?<!\\d)\\d{11}(?!\\d)",window)),None)
+            pin=next(iter(re.findall("(?<![0-9])[0-9]{6}(?![0-9])",window)),None)
+            code=next(iter(re.findall("(?<![0-9])[0-9]{11}(?![0-9])",window)),None)
             out.append(ExtractedEntity(line,url,pin=pin,source_record_id=code))
     return out
 def extract_html(text:str,url:str)->list[ExtractedEntity]:
