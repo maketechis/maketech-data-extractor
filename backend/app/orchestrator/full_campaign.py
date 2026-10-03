@@ -32,12 +32,23 @@ def run_next_full_district(db:Session,campaign_id:int,*,adapters=None,enrichment
             campaign.status=CampaignStatus.COMPLETED if stats["failed"]==0 else CampaignStatus.FAILED;db.commit()
         sync_run(db,run,campaign.status)
         return {"campaign_id":campaign_id,"campaign_run_id":run.id,"status":"no_pending_districts","stats":stats}
+    location_id=location.id;district_id=location.district_id
     campaign.status=CampaignStatus.RUNNING;db.commit()
-    district=db.get(District,location.district_id)
-    invalid_cleanup=cleanup_invalid_source_entities(db,district_name=district.name,state_name=db.get(__import__("app.models.core",fromlist=["State"]).State,district.state_id).name)
-    before=merge_exact_duplicates(db)["duplicates_merged"]
-    source_result=run_source_pipeline(db,campaign,district)
-    result=process_district(db,campaign,location,adapters=adapters,enrichment_limit=enrichment_limit,max_pages=max_pages)
+    location=db.get(CampaignLocation,location_id);district=db.get(District,district_id)
+    try:
+        state_name=db.get(__import__("app.models.core",fromlist=["State"]).State,district.state_id).name
+        invalid_cleanup=cleanup_invalid_source_entities(db,district_name=district.name,state_name=state_name)
+        before=merge_exact_duplicates(db)["duplicates_merged"]
+        db.commit()
+        location=db.get(CampaignLocation,location_id);district=db.get(District,district_id);campaign=db.get(Campaign,campaign_id)
+        source_result=run_source_pipeline(db,campaign,district)
+        result=process_district(db,campaign,location,adapters=adapters,enrichment_limit=enrichment_limit,max_pages=max_pages)
+    except Exception as exc:
+        db.rollback()
+        campaign=db.get(Campaign,campaign_id);location=db.get(CampaignLocation,location_id)
+        campaign.status=CampaignStatus.FAILED;location.status=LocationStatus.FAILED;location.last_error=f"{type(exc).__name__}: {str(exc)[:1000]}"
+        db.commit();sync_run(db,run,CampaignStatus.FAILED)
+        return {"campaign_id":campaign_id,"campaign_run_id":run.id,"campaign_status":"failed","status":"failed","error":location.last_error}
     after=merge_exact_duplicates(db)["duplicates_merged"]
     quality_data=_quality(source_result,result,before+after)
     quality_data["invalid_cleanup"]=invalid_cleanup
