@@ -14,7 +14,7 @@ def classify(url:str,title:str)->tuple[str,int]:
     if any(x in t for x in ("siwan","district")):score+=10
     return kind,min(score,100)
 def discovery_queries(entity_type:str,district:str,state:str,country:str)->list[str]:
-    return [f'{entity_type} list {district} {state}',f'{entity_type} directory {district} {state}',f'{entity_type} {district} {state} filetype:pdf',f'{entity_type} {district} {state} government list',f'{entity_type} institutions {district} {state}',f'{entity_type} affiliation list {district} {state}']
+    return [f'{entity_type} list {district} {state}',f'{entity_type} directory {district} {state}',f'{entity_type} {district} {state} filetype:pdf',f'{entity_type} {district} {state} filetype:xlsx',f'{entity_type} {district} {state} government list',f'government {entity_type} list {district} {state}',f'private {entity_type} list {district} {state}',f'UDISE {entity_type} {district} {state}',f'CBSE {entity_type} {district} {state} affiliation',f'{entity_type} institutions {district} {state}',f'{entity_type} affiliation list {district} {state}',f'{district} district education {entity_type} report']
 def discover_sources(*,entity_type:str,district:str,state:str,country:str,settings:SearchSettings)->dict:
     found={};metrics={x:{"results":0,"sources":0} for x in settings.enabled_engines()};diagnostics={x:EngineDiagnostic(x) for x in settings.enabled_engines()}
     for q in discovery_queries(entity_type,district,state,country):
