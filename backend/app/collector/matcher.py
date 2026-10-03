@@ -27,7 +27,8 @@ def find_existing_entity(db:Session,*,record:RawEntity,entity_type_id:int,distri
         raw_domain=urlparse(value).netloc.lower().removeprefix("www.")
     for entity in candidates:
         score=0; evidence=[]; sim=_name_similarity(record.name,entity.name)
-        if sim>=0.95: score+=45; evidence.append("name_exact")
+        if normalize_name(record.name)==normalize_name(entity.name): score+=70; evidence.append("name_exact_district")
+        elif sim>=0.95: score+=45; evidence.append("name_near_exact")
         elif sim>=0.82: score+=30; evidence.append("name_similar")
         if record.pin and entity.pin and record.pin==entity.pin: score+=20; evidence.append("pin")
         if raw_phone:
